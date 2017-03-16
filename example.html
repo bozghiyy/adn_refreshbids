@@ -28,6 +28,20 @@ function initAdserver() {
 // Load GPT when timeout is reached if bidders haven't responded.
 setTimeout(initAdserver, PREBID_TIMEOUT);
 
+function refreshSlot(slot) {
+    var codes = [];
+    for (var i = 0; i<slot.length; i++)
+        codes.push(slot[i].getSlotElementId());
+        pbjs.que.push(function() {
+         pbjs.requestBids({
+           timeout: PREBID_TIMEOUT,
+           adUnitCodes: codes,
+           bidsBackHandler: function() {
+             pbjs.setTargetingForGPTAsync(codes);
+             googletag.pubads().refresh(slot);
+    }});});}
+
+
 var pbjs = pbjs || {};
 pbjs.que = pbjs.que || [];
 
@@ -172,19 +186,23 @@ pbjs.que.push(function() {
 
 </script>
 <script>
+var dfpSlots = [];
   googletag.cmd.push(function() {
 
-    googletag.defineSlot('/51987917/EverydayFamily_300x250_1', [[300, 250]], 'div-gpt-ad-300x250_InContent1-1').addService(googletag.pubads());
-    googletag.defineSlot('/51987917/EverydayFamily_300x250_2', [[300, 250]], 'div-gpt-ad-300x600_InContent2-2').addService(googletag.pubads());
-    googletag.defineSlot('/51987917/EverydayFamily_300x250_3', [[300, 250]], 'div-gpt-ad-300x600_InContent2-3').addService(googletag.pubads());
-    googletag.defineSlot('/51987917/EverydayFamily_300x600', [[300, 600]], 'div-gpt-ad-300x600_Sidebar2-5').addService(googletag.pubads());
-    googletag.defineSlot('/51987917/EverydayFamily_300x50', [[300, 50]], 'div-gpt-ad-Adhesion-7').addService(googletag.pubads());
+    dfpSlots[0] = googletag.defineSlot('/51987917/EverydayFamily_300x250_1', [[300, 250]], 'div-gpt-ad-300x250_InContent1-1').addService(googletag.pubads());
+    dfpSlots[1] = googletag.defineSlot('/51987917/EverydayFamily_300x250_2', [[300, 250]], 'div-gpt-ad-300x600_InContent2-2').addService(googletag.pubads());
+    dfpSlots[2] = googletag.defineSlot('/51987917/EverydayFamily_300x250_3', [[300, 250]], 'div-gpt-ad-300x600_InContent2-3').addService(googletag.pubads());
+    dfpSlots[3] = googletag.defineSlot('/51987917/EverydayFamily_300x600', [[300, 600]], 'div-gpt-ad-300x600_Sidebar2-5').addService(googletag.pubads());
+    dfpSlots[4] = googletag.defineSlot('/51987917/EverydayFamily_300x50', [[300, 50]], 'div-gpt-ad-Adhesion-7').addService(googletag.pubads());
 
     pbjs.que.push(function() {
        pbjs.setTargetingForGPTAsync();
     });
   googletag.pubads().enableSingleRequest();
   googletag.enableServices();
+
+  setInterval(function(){refreshSlot(dfpSlots);}, 20000);
+
   });
 </script>
 </head>
